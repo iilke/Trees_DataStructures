@@ -45,69 +45,69 @@ public class BinarySearchTree {
     }
 
 
+    /*--------------------------------------------------------------DELETION-----------------------------------------------------*/
     //if root is being deleted, in order not to break the binary search tree rule:
     //1st option: smallest of right subtree should be new root
     //2nd option: largest of left subtree should be new root
 
+    //a note to myself for studying deletion: https://www.youtube.com/watch?v=kouxiP_H5WE
 
-    //deletion part is taken from 'geeksforgeeks'
-    Node deleteNode(Node root, int key) {
-        // Base case
-        if (root == null)
-            return root;
-
-        // Recursive calls for ancestors of
-        // node to be deleted
-        if (key < root.key) {
-            root.left = deleteNode(root.left, key);
-            return root;
-        } else if (key > root.key) {
-            root.right = deleteNode(root.right, key);
-            return root;
+    Node deleteNode(Node root, int key){
+        if(root == null){ //if tree is empty
+            return null;
         }
 
-        // We reach here when root is the node
-        // to be deleted.
-
-        // If one of the children is empty
-        if (root.left == null) {
-            Node temp = root.right;
-            return temp;
-        } else if (root.right == null) {
-            Node temp = root.left;
-            return temp;
+        if(root.key == key){ //element to be deleted is found
+            return helper(root);
         }
 
-        // If both children exist
-        else {
-
-            Node succParent = root;
-
-            // Find successor
-            Node succ = root.right;
-            while (succ.left != null) {
-                succParent = succ;
-                succ = succ.left;
+        Node dummy = root;
+        while(root != null){  //find element to be deleted
+            if(root.key > key){ //if it's smaller than root, search it in left side
+                if(root.left != null && root.left.key == key){ //if the left is key itself, take action and delete it.
+                    root.left = helper(root.left);
+                    break;
+                }
+                else{  //key is on left subtree, but not the left node yet, it's in deeper
+                    root = root.left;
+                }
             }
+            else{ //it's larger than root, search it in right side
+                if(root.right != null && root.right.key == key){ //if the right is key itself, take action and delete it.
+                    root.right = helper(root.right);
+                    break;
+                }
+                else{ //key is on left subtree, but not the left node yet, it's in deeper
+                    root = root.right;
+                }
+            }
+        }
+        return dummy;  //the first node, real root on top
+    }
 
-            // Delete successor.  Since successor
-            // is always left child of its parent
-            // we can safely make successor's right
-            // right child as left of its parent.
-            // If there is no succ, then assign
-            // succ.right to succParent.right
-            if (succParent != root)
-                succParent.left = succ.right;
-            else
-                succParent.right = succ.right;
-
-            // Copy Successor Data to root
-            root.key = succ.key;
-
-            // Delete Successor and return root
-            return root;
+    public Node helper(Node root){//for deleting
+        if(root.left == null){  //if given part of tree doesn't have left subtree then deleted node's parent will be connected to right tree
+            return root.right;
+        }
+        else if(root.right == null){  //if given part of tree doesn't have right subtree then deleted node's parent will be connected to left tree
+            return root.left;
+        }
+        else{  //given part of the tree has both right and left side
+            Node rightChild = root.right;
+            Node lastRight = findLastRight(root.left);
+            lastRight.right = rightChild;
+            return root.left;
         }
     }
+
+    public Node findLastRight(Node root){
+        if(root.right == null){
+            return root;
+        }
+        return findLastRight(root.right);
+    }
+
+    /*-------------------------------------------------------------------------------------------------------------------------------------------*/
 
 
     public void inOrderTraversal(Node root){
@@ -147,13 +147,15 @@ public class BinarySearchTree {
 
     public static void main(String[] args){
         BinarySearchTree bst = new BinarySearchTree();
+        bst.insert(12,"twelve");
         bst.insert(5,"five");
         bst.insert(25, "twenty-five");
         bst.insert(18, "eighteen");
         bst.insert(10, "ten");
-        bst.insert(12,"twelve");
         bst.insert(3,"three");
         bst.insert(55, "fifty-five");
+        bst.insert(6,"six");
+        bst.insert(8,"eight");
 
 
         bst.inOrderTraversal(bst.root);
@@ -170,10 +172,13 @@ public class BinarySearchTree {
         System.out.println("Min value on tree:");
         System.out.println(bst.min(bst.root).key);
 
-        System.out.println("delete 25: ");
-        bst.deleteNode(bst.root,25);
+
+        bst.inOrderTraversal(bst.root);
 
 
+        System.out.println();
+        System.out.println("deletion of 5:");
+        bst.deleteNode(bst.root, 5);
         bst.inOrderTraversal(bst.root);
     }
 
